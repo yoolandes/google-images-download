@@ -261,6 +261,7 @@ class googleimagesdownload:
         options = webdriver.ChromeOptions()
         options.add_argument('--no-sandbox')
         options.add_argument("--headless")
+        options.add_argument('--disable-dev-shm-usage')   
 
         if browser == 'Firefox':
             browser = webdriver.Firefox()
