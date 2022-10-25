@@ -255,6 +255,8 @@ class googleimagesdownload:
     def download_extended_page(self, url, chromedriver, browser):
         from selenium import webdriver
         from selenium.webdriver.common.keys import Keys
+        from selenium.webdriver.chrome.service import Service
+
         if sys.version_info[0] < 3:
             reload(sys)
             sys.setdefaultencoding('utf8')
@@ -267,7 +269,7 @@ class googleimagesdownload:
             browser = webdriver.Firefox()
         else:
             try:
-                browser = webdriver.Chrome(chromedriver, chrome_options=options)
+                browser = webdriver.Chrome(service=Service(chromedriver), chrome_options=options)
             except Exception as e:
                 print("Looks like we cannot locate the path the 'chromedriver' (use the '--chromedriver' "
                       "argument to specify the path to the executable.) or google chrome browser is not "
@@ -277,6 +279,16 @@ class googleimagesdownload:
 
         # Open the link
         browser.get(url)
+        
+        time.sleep(1)
+
+        # Bypass "Before you continue" if it appears
+        try:
+            browser.find_element(By.CSS_SELECTOR, "[aria-label='Accept all']").click()
+            time.sleep(1)
+        except selenium.common.exceptions.NoSuchElementException:
+            pass
+      
         browser.execute_script("""
             (function(XHR){
                 "use strict";
@@ -304,18 +316,8 @@ class googleimagesdownload:
                 XHR.prototype._data = [];
             })(XMLHttpRequest);
         """)
-
-        time.sleep(1)
-
-        # Bypass "Before you continue" if it appears
-        try:
-            browser.find_element(By.CSS_SELECTOR, "[aria-label='Accept all']").click()
-            time.sleep(1)
-        except selenium.common.exceptions.NoSuchElementException:
-            pass
-
         print("Getting you a lot of images. This may take a few moments...")
-
+       
         element = browser.find_element(By.TAG_NAME, "body")
         # Scroll down
         for i in range(50):
